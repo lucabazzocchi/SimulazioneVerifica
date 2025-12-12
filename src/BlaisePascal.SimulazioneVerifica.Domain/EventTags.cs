@@ -10,11 +10,10 @@ namespace BlaisePascal.SimulazioneVerifica.Domain
     {
         None,
         Music,
+        Theather,
+        Sport,
+        Culture,
         Cinema,
         Birthday,
-        Sport,
-        Theather,
-        Culture,
-
     }
 }
