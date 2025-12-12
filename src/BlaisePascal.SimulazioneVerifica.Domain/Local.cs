@@ -168,39 +168,27 @@ namespace BlaisePascal.SimulazioneVerifica.Domain
                 }
             }
 
-            int numRighe = uniqueEventTags.Count;
-
-            if (numRighe == 0)
-                return new Event[0][];
-
             List<List<Event>> temporaryLists = new List<List<Event>>();
 
-            for (int r = 0; r < numRighe; r++)
+            for (int r = 0; r < uniqueEventTags.Count; r++)
             {
-                temporaryLists.Add(Events);
+                temporaryLists.Add(new List<Event>());
             }
-
-            for (int j = 0; j < Events.Count; j++)
+            for (int i = 0; i < Events.Count; i++)
             {
-                Event currentEvent = Events[j];
-                for (int c = 0; c < currentEvent.EventTagList.Count; c++)
+                Event currentEvent = Events[i];
+
+                for (int t = 0; t < uniqueEventTags.Count; t++)
                 {
-                    EventTags currentEventTag = currentEvent.EventTagList[c];
-
-                    for (int r = 0; r < numRighe; r++)
+                    if (currentEvent.ContainsTag(uniqueEventTags[t]))
                     {
-                        if (currentEventTag == uniqueEventTags[r])
-                            temporaryLists[r].Add(currentEvent);
-                        break;
-
-
-
+                        temporaryLists[t].Add(currentEvent);
                     }
                 }
             }
-
-            Event[][] jaggedArrayEvents = new Event[numRighe][];
-            for (int i = 0; i < numRighe; i++)
+           
+            Event[][] jaggedArrayEvents = new Event[uniqueEventTags.Count][];
+            for (int i = 0; i < temporaryLists.Count; i++)
             {
                 // Conversione della List<Event> in Event[] (Array interno)
                 jaggedArrayEvents[i] = temporaryLists[i].ToArray();
