@@ -2,6 +2,6 @@
 {
     public class Class1
     {
-
+        partial void PartialMethod();
     }
 }
