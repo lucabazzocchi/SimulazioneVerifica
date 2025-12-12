@@ -106,6 +106,106 @@ namespace BlaisePascal.SimulazioneVerifica.Domain
             }
             return compatibleEvents;
         }
-        
+
+        public int[,] GenerateEventTagsMatrix()
+        {
+            List<EventTags> uniqueEventTags = new List<EventTags>();
+            for(int i = 0; i<Events.Count; i++)
+            {
+                for(int j = 0; j < Events[i].EventTagList.Count; j++)
+                {
+                    EventTags currentTag = Events[i].EventTagList[j];
+                    bool tagsFound = false;
+                    for(int c = 0; c<uniqueEventTags.Count; c++)
+                    {
+                        if (currentTag == uniqueEventTags[c])
+                        {
+                            tagsFound = true;
+                            break;
+                        }
+                    }
+                    if (!tagsFound)
+                        uniqueEventTags.Add(currentTag);
+                }
+            }
+            int numRighe = uniqueEventTags.Count;
+            int numColonne = Events.Count;
+            int[,] EventTagsMatrix = new int[numRighe, numColonne];
+            for(int c = 0; c<Events.Count; c++)
+            {
+                for(int r = 0; r<uniqueEventTags.Count; r++)
+                {
+                    if (Events[c].ContainsTag(uniqueEventTags[r]))
+                    {
+                        EventTagsMatrix[r, c] = 1;
+                    }
+                    else
+                        EventTagsMatrix[r, c] = 0;
+                }
+            }
+            return EventTagsMatrix;
+        }
+
+        public Event[][] GenerateJaggedEventsTag()
+        {
+            List<EventTags> uniqueEventTags = new List<EventTags>();
+            for (int i = 0; i < Events.Count; i++)
+            {
+                for (int j = 0; j < Events[i].EventTagList.Count; j++)
+                {
+                    EventTags currentTag = Events[i].EventTagList[j];
+                    bool tagsFound = false;
+                    for (int c = 0; c < uniqueEventTags.Count; c++)
+                    {
+                        if (currentTag == uniqueEventTags[c])
+                        {
+                            tagsFound = true;
+                            break;
+                        }
+                    }
+                    if (!tagsFound)
+                        uniqueEventTags.Add(currentTag);
+                }
+            }
+
+            int numRighe = uniqueEventTags.Count;
+
+            if (numRighe == 0)
+                return new Event[0][];
+
+            List<List<Event>> temporaryLists = new List<List<Event>>();
+
+            for (int r = 0; r < numRighe; r++)
+            {
+                temporaryLists.Add(Events);
+            }
+
+            for (int j = 0; j < Events.Count; j++)
+            {
+                Event currentEvent = Events[j];
+                for (int c = 0; c < currentEvent.EventTagList.Count; c++)
+                {
+                    EventTags currentEventTag = currentEvent.EventTagList[c];
+
+                    for (int r = 0; r < numRighe; r++)
+                    {
+                        if (currentEventTag == uniqueEventTags[r])
+                            temporaryLists[r].Add(currentEvent);
+                        break;
+
+
+
+                    }
+                }
+            }
+
+            Event[][] jaggedArrayEvents = new Event[numRighe][];
+            for (int i = 0; i < numRighe; i++)
+            {
+                // Conversione della List<Event> in Event[] (Array interno)
+                jaggedArrayEvents[i] = temporaryLists[i].ToArray();
+            }
+            return jaggedArrayEvents;
+        }
     }
 }
