@@ -10,167 +10,263 @@ namespace BlaisePascal.SimulazioneVerifica.Domain
     {
         public string Name { get; set; }
         public List<Event> Events { get; set; }
-        public Local(string name, List<Event> events)
+        public Local(string name)
         {
             Name = name;
-            Events = events;
+            Events = new List<Event>();
         }
-        public void AddEvent(string nome, DateOnly giorno, List<EventTags> tags, double cost)
+
+        public void AddEvent(Event eventToAdd)
         {
-            Event eventToAdd = new Event(nome, giorno, tags, cost);
             Events.Add(eventToAdd);
         }
 
+        //public Event MostExpensiveEvent()
+        //{
+        //    if (Events == null)
+        //        throw new ArgumentNullException(nameof(Events));
+
+        //    Event mostExpensiveEvent = Events[0];
+        //    for (int i = 1; i<Events.Count; i++)
+        //    {
+        //        if (Events[i].TicketCost > mostExpensiveEvent.TicketCost)
+        //        {
+        //            mostExpensiveEvent = Events[i];
+        //        }
+        //    }
+        //    return mostExpensiveEvent;
+        //}
+
+
+
         public Event MostExpensiveEvent()
         {
-            if (Events == null)
-                throw new ArgumentNullException(nameof(Events));
-
-            Event mostExpensiveEvent = Events[0];
-            for (int i = 1; i<Events.Count; i++)
+            if (Events.Count == 0)
+                throw new InvalidOperationException(nameof(Events));
+            Event maxEventCost = Events[0];
+            foreach (var evento in Events)
             {
-                if (Events[i].TicketCost > mostExpensiveEvent.TicketCost)
-                {
-                    mostExpensiveEvent = Events[i];
-                }
+                if (evento.TicketCost > maxEventCost.TicketCost)
+                    maxEventCost = evento;
             }
-            return mostExpensiveEvent;
+            return maxEventCost;
         }
+
+        //public EventTags MostFrequentEventTag()
+        //{
+        //    if (Events == null)
+        //        throw new ArgumentNullException(nameof(Events));
+        //    EventTags mostFrequentTag = Events[0].EventTagList[0];
+        //    List<EventTags> tags = new List<EventTags>();
+        //    List<int> Counters = new List<int>();
+        //    int maxCounter = 0;
+        //    int maxIndex = 0;
+        //    for (int i = 0; i < Events.Count; i++)
+        //    {
+        //        for(int j = 0; j < Events[i].EventTagList.Count; j++)
+        //        {
+        //            EventTags currentTag = Events[i].EventTagList[j];
+        //            bool tagExists = false;
+        //            int foundIndex = -1;
+        //            for (int c = 0; c< tags.Count; c++)
+        //            {
+        //                if (currentTag == tags[c])
+        //                {
+        //                    tagExists = true;
+        //                    foundIndex = c;
+        //                    break;
+        //                }
+        //            }
+        //            if (tagExists)
+        //            {
+        //                Counters[foundIndex]++;
+        //            }
+        //            else
+        //            {
+        //                tags.Add(currentTag);
+        //                Counters.Add(1);
+        //            }
+        //        }
+        //    }
+        //    for(int i = 0; i<Counters.Count; i++)
+        //    {
+        //        if (Counters[i] > maxCounter)
+        //        {
+        //            maxCounter = Counters[i];
+        //            maxIndex = i;
+        //        }
+        //        if(maxIndex != -1)
+        //        mostFrequentTag = tags[maxIndex];
+        //    }
+        //    return mostFrequentTag;
+        //}
 
         public EventTags MostFrequentEventTag()
         {
-            if (Events == null)
-                throw new ArgumentNullException(nameof(Events));
+            if (Events.Count == 0)
+                throw new InvalidOperationException(nameof(Events));
             EventTags mostFrequentTag = Events[0].EventTagList[0];
             List<EventTags> tags = new List<EventTags>();
             List<int> Counters = new List<int>();
-            int maxCounter = 0;
-            int maxIndex = 0;
-            for (int i = 0; i < Events.Count; i++)
+            foreach(var e in Events)
             {
-                for(int j = 0; j < Events[i].EventTagList.Count; j++)
+                foreach(var t in e.EventTagList)
                 {
-                    EventTags currentTag = Events[i].EventTagList[j];
-                    bool tagExists = false;
+                    bool tagExist = false;
                     int foundIndex = -1;
-                    for (int c = 0; c< tags.Count; c++)
+                    for(int i = 0; i<tags.Count; i++)
                     {
-                        if (currentTag == tags[c])
+                        if (t == tags[i])
                         {
-                            tagExists = true;
-                            foundIndex = c;
+                            tagExist = true;
+                            foundIndex = i;
                             break;
                         }
                     }
-                    if (tagExists)
+                    if (tagExist)
                     {
                         Counters[foundIndex]++;
                     }
                     else
                     {
-                        tags.Add(currentTag);
+                        tags.Add(t);
                         Counters.Add(1);
                     }
-                        
-                    
                 }
-            }
-            for(int i = 0; i<Counters.Count; i++)
-            {
-                if (Counters[i] > maxCounter)
+                int maxCounter = 0;
+                int maxIndex = 0;
+                for (int i = 0; i<Counters.Count; i++)
                 {
-                    maxCounter = Counters[i];
-                    maxIndex = i;
+                    if(Counters[i] > maxCounter)
+                    {
+                        maxCounter = Counters[i];
+                        maxIndex = i;
+                    }
+                    mostFrequentTag = tags[maxIndex];
                 }
-                if(maxIndex != -1)
-                mostFrequentTag = tags[maxIndex];
             }
             return mostFrequentTag;
         }
 
         public List<Event> CompatibleEvents(List<EventTags> tags)
         {
-            if (Events == null)
-                throw new ArgumentNullException(nameof(Events));
+            if (Events.Count == 0)
+                throw new InvalidOperationException(nameof(Events));
 
             List<Event> compatibleEvents = new List<Event>();
 
-            for(int i = 0; i<Events.Count; i++)
+            foreach(var e in Events)
             {
-                Event currentEvent = Events[i];
-
-                if (currentEvent.ContainTags(tags))
-                {
-                    compatibleEvents.Add(currentEvent);
-                }
+                if (e.ContainTags(tags))
+                    compatibleEvents.Add(e);
             }
+            
             return compatibleEvents;
         }
 
+        //public int[,] GenerateEventTagsMatrix()
+        //{
+        //    List<EventTags> uniqueEventTags = new List<EventTags>();
+        //    for(int i = 0; i<Events.Count; i++)
+        //    {
+        //        for(int j = 0; j < Events[i].EventTagList.Count; j++)
+        //        {
+        //            EventTags currentTag = Events[i].EventTagList[j];
+        //            bool tagsFound = false;
+        //            for(int c = 0; c<uniqueEventTags.Count; c++)
+        //            {
+        //                if (currentTag == uniqueEventTags[c])
+        //                {
+        //                    tagsFound = true;
+        //                    break;
+        //                }
+        //            }
+        //            if (!tagsFound)
+        //                uniqueEventTags.Add(currentTag);
+        //        }
+        //    }
+        //    int numRighe = uniqueEventTags.Count;
+        //    int numColonne = Events.Count;
+        //    int[,] EventTagsMatrix = new int[numRighe, numColonne];
+        //    for(int c = 0; c<Events.Count; c++)
+        //    {
+        //        for(int r = 0; r<uniqueEventTags.Count; r++)
+        //        {
+        //            if (Events[c].ContainsTag(uniqueEventTags[r]))
+        //            {
+        //                EventTagsMatrix[r, c] = 1;
+        //            }
+        //            else
+        //                EventTagsMatrix[r, c] = 0;
+        //        }
+        //    }
+        //    return EventTagsMatrix;
+        //}
+
+
+        
+
+
         public int[,] GenerateEventTagsMatrix()
         {
-            List<EventTags> uniqueEventTags = new List<EventTags>();
-            for(int i = 0; i<Events.Count; i++)
+            HashSet<EventTags> uniqueTags = new HashSet<EventTags>();
+            foreach(var e in Events)
             {
-                for(int j = 0; j < Events[i].EventTagList.Count; j++)
+                foreach(var tag in e.EventTagList)
                 {
-                    EventTags currentTag = Events[i].EventTagList[j];
-                    bool tagsFound = false;
-                    for(int c = 0; c<uniqueEventTags.Count; c++)
-                    {
-                        if (currentTag == uniqueEventTags[c])
-                        {
-                            tagsFound = true;
-                            break;
-                        }
-                    }
-                    if (!tagsFound)
-                        uniqueEventTags.Add(currentTag);
+                    uniqueTags.Add(tag);
                 }
             }
-            int numRighe = uniqueEventTags.Count;
-            int numColonne = Events.Count;
-            int[,] EventTagsMatrix = new int[numRighe, numColonne];
+            List<EventTags> tags = uniqueTags.ToList();
+            int numRaws = tags.Count;
+            int numCol = Events.Count;
+            int[,] matrix = new int[numRaws, numCol];
             for(int c = 0; c<Events.Count; c++)
             {
-                for(int r = 0; r<uniqueEventTags.Count; r++)
+                for(int r = 0; r<tags.Count; r++)
                 {
-                    if (Events[c].ContainsTag(uniqueEventTags[r]))
+                    if (Events[c].ContainsTag(tags[r]))
                     {
-                        EventTagsMatrix[r, c] = 1;
+                        matrix[r, c] = 1;
                     }
-                    else
-                        EventTagsMatrix[r, c] = 0;
                 }
             }
-            return EventTagsMatrix;
+            return matrix;
         }
+
 
         public Event[][] GenerateJaggedEventsTag()
         {
-            List<EventTags> uniqueEventTags = new List<EventTags>();
-            for (int i = 0; i < Events.Count; i++)
+            //List<EventTags> uniqueEventTags = new List<EventTags>();
+            //for (int i = 0; i < Events.Count; i++)
+            //{
+            //    for (int j = 0; j < Events[i].EventTagList.Count; j++)
+            //    {
+            //        EventTags currentTag = Events[i].EventTagList[j];
+            //        bool tagsFound = false;
+            //        for (int c = 0; c < uniqueEventTags.Count; c++)
+            //        {
+            //            if (currentTag == uniqueEventTags[c])
+            //            {
+            //                tagsFound = true;
+            //                break;
+            //            }
+            //        }
+            //        if (!tagsFound)
+            //            uniqueEventTags.Add(currentTag);
+            //    }
+            //}
+            HashSet<EventTags> uniqueTagss = new HashSet<EventTags>();
+            foreach (var e in Events)
             {
-                for (int j = 0; j < Events[i].EventTagList.Count; j++)
+                foreach (var tag in e.EventTagList)
                 {
-                    EventTags currentTag = Events[i].EventTagList[j];
-                    bool tagsFound = false;
-                    for (int c = 0; c < uniqueEventTags.Count; c++)
-                    {
-                        if (currentTag == uniqueEventTags[c])
-                        {
-                            tagsFound = true;
-                            break;
-                        }
-                    }
-                    if (!tagsFound)
-                        uniqueEventTags.Add(currentTag);
+                    uniqueTagss.Add(tag);
                 }
             }
-
+            List<EventTags> tags = uniqueTagss.ToList();
             List<List<Event>> temporaryLists = new List<List<Event>>();
-
-            for (int r = 0; r < uniqueEventTags.Count; r++)
+            foreach(var t in tags)
             {
                 temporaryLists.Add(new List<Event>());
             }
@@ -178,16 +274,15 @@ namespace BlaisePascal.SimulazioneVerifica.Domain
             {
                 Event currentEvent = Events[i];
 
-                for (int t = 0; t < uniqueEventTags.Count; t++)
+                for (int t = 0; t < tags.Count; t++)
                 {
-                    if (currentEvent.ContainsTag(uniqueEventTags[t]))
+                    if (currentEvent.ContainsTag(tags[t]))
                     {
                         temporaryLists[t].Add(currentEvent);
                     }
                 }
             }
-           
-            Event[][] jaggedArrayEvents = new Event[uniqueEventTags.Count][];
+            Event[][] jaggedArrayEvents = new Event[tags.Count][];
             for (int i = 0; i < temporaryLists.Count; i++)
             {
                 // Conversione della List<Event> in Event[] (Array interno)
