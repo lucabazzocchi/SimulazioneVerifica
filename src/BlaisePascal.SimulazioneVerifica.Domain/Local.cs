@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,17 +40,38 @@ namespace BlaisePascal.SimulazioneVerifica.Domain
 
 
 
-        public Event MostExpensiveEvent()
+        //public Event MostExpensiveEvent()
+        //{
+        //    if (Events.Count == 0)
+        //        throw new InvalidOperationException(nameof(Events));
+        //    Event maxEventCost = Events[0];
+        //    foreach (var evento in Events)
+        //    {
+        //        if (evento.TicketCost > maxEventCost.TicketCost)
+        //            maxEventCost = evento;
+        //    }
+        //    return maxEventCost;
+        //}
+
+        public List<Event> MostExpensiveEvent()
         {
             if (Events.Count == 0)
                 throw new InvalidOperationException(nameof(Events));
-            Event maxEventCost = Events[0];
+            double maxCost = 0.0;
             foreach (var evento in Events)
             {
-                if (evento.TicketCost > maxEventCost.TicketCost)
-                    maxEventCost = evento;
+                if (evento.TicketCost > maxCost)
+                    maxCost = evento.TicketCost;
             }
-            return maxEventCost;
+            List<Event> events = new List<Event>();
+            foreach(Event e  in Events)
+            {
+                if(e.TicketCost == maxCost)
+                {
+                    events.Add(e);
+                }
+            }
+            return events;
         }
 
         //public EventTags MostFrequentEventTag()
@@ -100,50 +122,81 @@ namespace BlaisePascal.SimulazioneVerifica.Domain
         //    }
         //    return mostFrequentTag;
         //}
+        public List<EventTags> CreateUniqueTags()
+        {
+            List<EventTags> uniqueEventTags = new List<EventTags>();
+            for (int i = 0; i < Events.Count; i++)
+            {
+                for (int j = 0; j < Events[i].EventTagList.Count; j++)
+                {
+                    EventTags currentTag = Events[i].EventTagList[j];
+                    bool tagsFound = false;
+                    for (int c = 0; c < uniqueEventTags.Count; c++)
+                    {
+                        if (currentTag == uniqueEventTags[c])
+                        {
+                            tagsFound = true;
+                            break;
+                        }
+                    }
+                    if (!tagsFound)
+                        uniqueEventTags.Add(currentTag);
+                }
+            }
+            return uniqueEventTags;
+        }
 
         public EventTags MostFrequentEventTag()
         {
             if (Events.Count == 0)
                 throw new InvalidOperationException(nameof(Events));
             EventTags mostFrequentTag = Events[0].EventTagList[0];
-            List<EventTags> tags = new List<EventTags>();
+            HashSet<EventTags> tags = new HashSet<EventTags>();
             List<int> Counters = new List<int>();
-            foreach(var e in Events)
+            //foreach(var e in Events)
+            //{
+            //    foreach(var t in e.EventTagList)
+            //    {
+            //        bool tagExist = false;
+            //        int foundIndex = -1;
+            //        for(int i = -1; i<tags.Count; i++)
+            //        {
+            //            if (t == tags[i])
+            //            {
+            //                tagExist = true;
+            //                foundIndex = i;
+            //                break;
+            //            }
+            //        }
+            //        if (tagExist)
+            //        {
+            //            Counters[foundIndex]++;
+            //        }
+            //        else
+            //        {
+            //            tags.Add(t);
+            //            Counters.Add(1);
+            //        }
+            //    }
+            foreach (var e in Events)
             {
-                foreach(var t in e.EventTagList)
+                foreach (var tag in e.EventTagList)
                 {
-                    bool tagExist = false;
-                    int foundIndex = -1;
-                    for(int i = 0; i<tags.Count; i++)
-                    {
-                        if (t == tags[i])
-                        {
-                            tagExist = true;
-                            foundIndex = i;
-                            break;
-                        }
-                    }
-                    if (tagExist)
-                    {
-                        Counters[foundIndex]++;
-                    }
-                    else
-                    {
-                        tags.Add(t);
-                        Counters.Add(1);
-                    }
+                    tags.Add(tag);
                 }
-                int maxCounter = 0;
-                int maxIndex = 0;
-                for (int i = 0; i<Counters.Count; i++)
-                {
-                    if(Counters[i] > maxCounter)
-                    {
-                        maxCounter = Counters[i];
-                        maxIndex = i;
-                    }
+            }
+            int maxCounter = 0;
+            int maxIndex = 0;
+            
+            for (int i = 0; i<Counters.Count; i++)
+            {
+               if(Counters[i] > maxCounter)
+               {
+                    maxCounter = Counters[i];
+                    maxIndex = i;
+               }
                     mostFrequentTag = tags[maxIndex];
-                }
+               }
             }
             return mostFrequentTag;
         }
@@ -218,9 +271,9 @@ namespace BlaisePascal.SimulazioneVerifica.Domain
                 }
             }
             List<EventTags> tags = uniqueTags.ToList();
-            int numRaws = tags.Count;
+            int numRows = tags.Count;
             int numCol = Events.Count;
-            int[,] matrix = new int[numRaws, numCol];
+            int[,] matrix = new int[numRows, numCol];
             for(int c = 0; c<Events.Count; c++)
             {
                 for(int r = 0; r<tags.Count; r++)
@@ -290,5 +343,7 @@ namespace BlaisePascal.SimulazioneVerifica.Domain
             }
             return jaggedArrayEvents;
         }
+
+        /// metodo riceve un array di interi di dimensioni 9, verificare che al suo interno siano contenuti tutti i numeri da 1 a 9
     }
 }
